@@ -1,0 +1,9 @@
+python-telegram-bot==21.1.1
+python-dotenv
+google-generativeai
+prompt-toolkit==3.0.28
+ipython
+requests
+beautifulsoup4
+
+
