@@ -48,7 +48,7 @@ etc
 
 - [Google AI Studio](https://aistudio.google.com/app/apikey)
 - [BotFather en Telegram](https://t.me/BotFather)
-- [Consola Google Cloud](https://console.cloud.google.com)
+- [Consola Google Cloud](console.cloud.google.com)
 
 ### 2. Configurar el archivo de entorno:
 

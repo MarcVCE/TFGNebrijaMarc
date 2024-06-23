@@ -3,13 +3,15 @@ import logging
 import sys
 from dotenv import load_dotenv
 from telegram import Update
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+from telegram.ext import (Application, CommandHandler, MessageHandler, 
+                          filters, ContextTypes, CallbackQueryHandler)
 import google.generativeai as genai
 import signal
-from message_handler import process_message, handle_specific_commands, generar_y_enviar_respuesta
+from message_handler import (process_message, handle_specific_commands, 
+                             generar_y_enviar_respuesta, preguntar_preferencia_respuesta)
 
 # Configurar el registro
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s', level=logging.INFO)
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Cargar variables de entorno desde el archivo .env
@@ -21,7 +23,8 @@ TELEGRAM_API_TOKEN = os.getenv("TELEGRAM_API_TOKEN")
 genai.configure(api_key=GOOGLE_API_KEY)
 
 # Inicializar el modelo generativo
-modelo = genai.GenerativeModel('gemini-pro')
+modelo = genai.GenerativeModel(model_name='gemini-pro')
+
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     start_message = (
@@ -40,11 +43,28 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     )
     await update.message.reply_text(start_message)
 
+
 async def message_handler_main(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    texto_recibido, idioma = await process_message(update, context)
-    using_any_handle_specific_commands = await handle_specific_commands(update, context, texto_recibido)
+    texto_recibido, idioma = await process_message(update=update, context=context)
+    using_any_handle_specific_commands = await handle_specific_commands(update=update, 
+                                                                        context=context, 
+                                                                        texto_recibido=texto_recibido)
     if not using_any_handle_specific_commands:
-       await generar_y_enviar_respuesta(update, context, texto_recibido, idioma, modelo)
+       await preguntar_preferencia_respuesta(update=update)
+
+
+
+async def post_boton_seleccionado(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.callback_query
+    await query.answer()
+    preferencia = query.data
+    context.user_data['preferencia_respuesta'] = preferencia
+    await generar_y_enviar_respuesta(update=query, 
+                                     context=context, 
+                                     texto_recibido=context.user_data['texto_recibido'], 
+                                     idioma=context.user_data['idioma'], 
+                                     modelo=modelo)
+
 
 
 async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -53,6 +73,7 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     # Notificar al usuario del error
     if update and update.effective_message:
         await update.effective_message.reply_text("Ocurrió un error inesperado. Inténtalo de nuevo más tarde.")
+
 
 
 def main() -> None:
@@ -66,6 +87,9 @@ def main() -> None:
     application.add_handler(MessageHandler(filters=filters.TEXT & ~filters.COMMAND, callback=message_handler_main))
     application.add_handler(MessageHandler(filters=filters.VOICE, callback=message_handler_main))
 
+    # Registrar el CallbackQueryHandler para los botones inline
+    application.add_handler(CallbackQueryHandler(callback=post_boton_seleccionado))
+
     # Registrar el manejador de errores
     application.add_error_handler(error_handler)
 
@@ -75,12 +99,13 @@ def main() -> None:
 
     # Registrar el manejador de señal para detener el bot
     signal.signal(signal.SIGINT, signal_handler)  # Mata proceso con CTRL+C
-    signal.signal(signal.SIGTERM, signal_handler) # Comunica al proceso un apagado “amable” (cerrando 
-                                                  # conexiones, ficheros y limpiando sus propios búferes)
+    signal.signal(signal.SIGTERM, signal_handler) # Comunica al proceso un apagado “amable” (cerrando conexiones, ficheros y limpiando sus propios búferes)
 
     # Iniciar el bot
     print("El bot está en funcionamiento. Presiona Ctrl + C para detener el script.")
     application.run_polling()
+
+
 
 if __name__ == '__main__':
     main()

@@ -1,16 +1,15 @@
-import os
 import logging
 import re
 import google.generativeai as genai
 import langid
-from telegram import Update
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 from myaudiototext import audio_a_texto
 from mytexttoaudio import texto_a_audio
 from scraping import handle_scrapear, handle_scrapear_enlace, handle_resumen
 
 # Configurar el registro
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s', level=logging.INFO)
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Diccionario de idiomas disponibles
@@ -50,7 +49,10 @@ async def process_message(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         if idioma_detectado_nom:
             idioma = idiomas_disponible.get(idioma_detectado_nom, "es-ES")
     
+    context.user_data['texto_recibido'] = texto_recibido
+    context.user_data['idioma'] = idioma
     return texto_recibido, idioma
+
 
 async def handle_specific_commands(update: Update, context: ContextTypes.DEFAULT_TYPE, texto_recibido: str) -> bool:
     if texto_recibido.startswith('scrapear:'):
@@ -64,17 +66,36 @@ async def handle_specific_commands(update: Update, context: ContextTypes.DEFAULT
         return True
     return False
 
-async def generar_y_enviar_respuesta(update: Update, context: ContextTypes.DEFAULT_TYPE, 
-                                     texto_recibido: str, idioma: str, modelo: genai.GenerativeModel) -> None:
-    
+
+async def preguntar_preferencia_respuesta(update: Update) -> None:
+    keyboard = [
+        [InlineKeyboardButton("Texto", callback_data='texto')],
+        [InlineKeyboardButton("Audio", callback_data='audio')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.message.reply_text("¿Cómo quieres recibir la respuesta?", reply_markup=reply_markup)
+
+
+async def generar_y_enviar_respuesta(
+        update: Update, 
+        context: ContextTypes.DEFAULT_TYPE, 
+        texto_recibido: str, 
+        idioma: str, 
+        modelo: genai.GenerativeModel
+    ) -> None:
+
     config = genai.GenerationConfig(max_output_tokens=512, temperature=0.1, top_p=1, top_k=32)
     respuesta = modelo.generate_content(contents=texto_recibido, generation_config=config)
     respuesta_text = respuesta.text
 
-    try:
-        texto_a_audio(respuesta_text, idioma)
+    preferencia = context.user_data.get('preferencia_respuesta', 'texto')
+
+    if preferencia == 'audio':
+        try:
+            texto_a_audio(respuesta_text, idioma)
+            await update.message.reply_voice(voice=open('respuesta.mp3', 'rb'))
+        except Exception as e:
+            logger.error("Error al convertir texto a audio:", exc_info=e)
+            await update.message.reply_text("Error al convertir el texto a audio.")
+    else:
         await update.message.reply_text(formatear_respuesta(respuesta_text))
-        await update.message.reply_voice(voice=open('respuesta.mp3', 'rb'))
-    except Exception as e:
-        logger.error("Error al convertir texto a audio:", exc_info=e)
-        await update.message.reply_text("Error al convertir el texto a audio.")
