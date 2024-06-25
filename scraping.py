@@ -29,11 +29,11 @@ def scrape_pubmed(query, max_results=5):
         # Guardar todos los resultados en un archivo .txt
         with open('pubmed_articles.txt', 'w', encoding='utf-8') as file:
             for idx, title, authors, link, summary in results:
-                file.write(f"{idx}. {title}\n   Autores: {authors}\n   Enlace: {link}\n   Resumen: {summary}\n\n")
+                file.write(f"{idx}. {title}\n   Authors: {authors}\n   Link: {link}\n   Summary: {summary}\n\n")
 
         return top_results
     else:
-        print('Error al acceder a PubMed')
+        print('Error accessing PubMed')
         return []
     
 
@@ -47,7 +47,7 @@ def scrape_article_link(link):
         abstract = soup.find('div', class_='abstract-content selected').get_text(strip=True) if soup.find('div', 'abstract-content selected') else 'No abstract available'
         return title, authors, abstract
     else:
-        print('Error al acceder al enlace proporcionado')
+        print('Error accessing the provided link')
         return None, None, None
 
 
@@ -57,16 +57,16 @@ async def handle_scrapear(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.message.text.split(':', 1)[1].strip()
     top_results = scrape_pubmed(query)
     if top_results:
-        response = "Aquí están los primeros 5 resultados:\n\n"
+        response = "Here are the top 5 results:\n\n"
         for idx, title, authors, link, summary in top_results:
-            response += f"{idx}. {title}\n   Autores: {authors}\n   Enlace: {link}\n\n"
+            response += f"{idx}. {title}\n   Authors: {authors}\n   Link: {link}\n\n"
         context.user_data['results'] = top_results
         await update.message.reply_text(response)
         
         # Enviar el archivo .txt con todos los resultados
         await update.message.reply_document(document=open('pubmed_articles.txt', 'rb'))
     else:
-        await update.message.reply_text('No se encontraron artículos para el término de búsqueda proporcionado.')
+        await update.message.reply_text('No articles found for the provided search term.')
 
 
 
@@ -81,12 +81,12 @@ async def handle_resumen(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if format_type.lower() == 'apa':
                 citation = f"{authors} ({link}). {title}. PubMed."
             else:
-                citation = f"{title} por {authors}. Más detalles en {link}."
-            await update.message.reply_text(f"Resumen del artículo {article_number}:\n\n{summary}\n\nCita en formato {format_type.upper()}:\n{citation}")
+                citation = f"{title} by {authors}. More details at {link}."
+            await update.message.reply_text(f"Summary of article {article_number}:\n\n{summary}\n\nCitation in {format_type.upper()} format:\n{citation}")
         else:
-            await update.message.reply_text('Número de artículo inválido o no se ha realizado una búsqueda previa.')
+            await update.message.reply_text('Invalid article number or no previous search performed.')
     except ValueError:
-        await update.message.reply_text('Por favor, proporciona un número de artículo válido.')
+        await update.message.reply_text('Please provide a valid article number.')
 
 
 
@@ -95,7 +95,7 @@ async def handle_scrapear_enlace(update: Update, context: ContextTypes.DEFAULT_T
     link = update.message.text.split(':', 1)[1].strip()
     title, authors, abstract = scrape_article_link(link)
     if title and authors and abstract:
-        response = f"Título: {title}\nAutores: {', '.join(authors)}\nResumen: {abstract}"
+        response = f"Title: {title}\nAuthors: {', '.join(authors)}\nSummary: {abstract}"
         await update.message.reply_text(response)
     else:
-        await update.message.reply_text('No se pudo obtener información del enlace proporcionado.')
+        await update.message.reply_text('Could not retrieve information from the provided link.')

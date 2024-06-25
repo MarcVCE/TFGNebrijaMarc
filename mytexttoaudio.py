@@ -3,7 +3,7 @@ import json
 from os import getenv
 import base64
 
-def texto_a_audio(respuesta: str, idioma: str):
+def text_to_audio(answer: str, language: str):
     # Tu API key de Google Cloud
     cloud_api = getenv("CLOUD_API")
 
@@ -17,11 +17,11 @@ def texto_a_audio(respuesta: str, idioma: str):
 
     data = {
         "input": {
-            "text": respuesta
+            "text": answer
         },
         "voice": {
-            "languageCode": idioma,
-            "name": f"{idioma}-Standard-B"  # Cambia esto al tipo de voz que prefieras
+            "languageCode": language,
+            "name": f"{language}-Standard-B"  # Cambia esto al tipo de voz que prefieras
         },
         "audioConfig": {
             "audioEncoding": "MP3"
@@ -42,6 +42,6 @@ def texto_a_audio(respuesta: str, idioma: str):
         with open("respuesta.mp3", "wb") as audio_file:
             audio_file.write(audio_content_decoded)
 
-        print("Conversión de texto a voz completada. Revisa el archivo respuesta.mp3.")
+        print("Text-to-speech complete. Revise the respuesta.mp3 file.")
     else:
-        print("Error en la solicitud:", response.text)
+        print("Query error:", response.text)

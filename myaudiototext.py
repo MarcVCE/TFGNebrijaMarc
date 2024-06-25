@@ -1,8 +1,8 @@
 import whisper
 
-def audio_a_texto(audio_path):
+def audio_to_text(audio_path):
     model = whisper.load_model("small")
     result = model.transcribe(audio_path)
-    idioma = result["language"]
-    texto = result["text"]
-    return texto, idioma
+    language = result["language"]
+    text = result["text"]
+    return text, language

@@ -8,7 +8,7 @@ from telegram.ext import (Application, CommandHandler, MessageHandler,
 import google.generativeai as genai
 import signal
 from message_handler import (process_message, handle_specific_commands, 
-                             generar_y_enviar_respuesta, preguntar_preferencia_respuesta)
+                             generate_and_send_answer, ask_answer_preference)
 
 # Configurar el registro
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -23,47 +23,47 @@ TELEGRAM_API_TOKEN = os.getenv("TELEGRAM_API_TOKEN")
 genai.configure(api_key=GOOGLE_API_KEY)
 
 # Inicializar el modelo generativo
-modelo = genai.GenerativeModel(model_name='gemini-pro')
+model = genai.GenerativeModel(model_name='gemini-pro')
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     start_message = (
-        "¡Bienvenido a Asistente Multifuncional 3000!\n"
-        "Estoy aquí para ayudarte con tus necesidades, desde traducir texto hasta brindarte recetas deliciosas.\n\n"
-        "Puedes controlarme enviando estos comandos:\n\n"
-        "Comandos Generales:\n"
-        "/start - Muestra este mensaje de inicio\n\n"
-        "Comandos de Búsqueda:\n"
-        "scrapear: <término de búsqueda> - Busca artículos científicos en PubMed\n"
-        "Ejemplo: scrapear: inteligencia artificial\n\n"
-        "scrapear_enlace: <enlace> - Realiza scraping de un enlace específico\n"
-        "Ejemplo: scrapear_enlace: https://pubmed.ncbi.nlm.nih.gov/34127285/\n\n"
-        "Para más información sobre cómo usar este bot, por favor visita la documentación de la API de Gemini: https://gemini.google.com/.\n"
-        "Este bot funciona con la API de Gemini de Google. Por favor, evita hacer preguntas no éticas. ¡Gracias!"
+        "Welcome to Multifunctional Assistant 3000!\n"
+        "I am here to help you with your needs, from translating text to providing delicious recipes.\n\n"
+        "You can control me by sending these commands:\n\n"
+        "General Commands:\n"
+        "/start - Show this start message\n\n"
+        "Search Commands:\n"
+        "scrape: <search term> - Search for scientific articles on PubMed\n"
+        "Example: scrape: artificial intelligence\n\n"
+        "scrape_link: <link> - Scrape a specific link\n"
+        "Example: scrape_link: https://pubmed.ncbi.nlm.nih.gov/34127285/\n\n"
+        "For more information on how to use this bot, please visit the Gemini API documentation: https://gemini.google.com/.\n"
+        "This bot works with the Google Gemini API. Please avoid asking unethical questions. Thank you!"
     )
     await update.message.reply_text(start_message)
 
 
 async def message_handler_main(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    texto_recibido, idioma = await process_message(update=update, context=context)
+    received_text, language = await process_message(update=update, context=context)
     using_any_handle_specific_commands = await handle_specific_commands(update=update, 
                                                                         context=context, 
-                                                                        texto_recibido=texto_recibido)
+                                                                        received_text=received_text)
     if not using_any_handle_specific_commands:
-       await preguntar_preferencia_respuesta(update=update)
+       await ask_answer_preference(update=update)
 
 
 
-async def post_boton_seleccionado(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def post_selected_button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
     await query.answer()
-    preferencia = query.data
-    context.user_data['preferencia_respuesta'] = preferencia
-    await generar_y_enviar_respuesta(update=query, 
-                                     context=context, 
-                                     texto_recibido=context.user_data['texto_recibido'], 
-                                     idioma=context.user_data['idioma'], 
-                                     modelo=modelo)
+    preference = query.data
+    context.user_data['answer_preference'] = preference
+    await generate_and_send_answer(update=query, 
+                                   context=context, 
+                                   received_text=context.user_data['received_text'], 
+                                   language=context.user_data['language'], 
+                                   model=model)
 
 
 
@@ -72,7 +72,7 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
     # Notificar al usuario del error
     if update and update.effective_message:
-        await update.effective_message.reply_text("Ocurrió un error inesperado. Inténtalo de nuevo más tarde.")
+        await update.effective_message.reply_text("An unexpected error occurred. Please try again later.")
 
 
 
@@ -88,13 +88,13 @@ def main() -> None:
     application.add_handler(MessageHandler(filters=filters.VOICE, callback=message_handler_main))
 
     # Registrar el CallbackQueryHandler para los botones inline
-    application.add_handler(CallbackQueryHandler(callback=post_boton_seleccionado))
+    application.add_handler(CallbackQueryHandler(callback=post_selected_button))
 
     # Registrar el manejador de errores
     application.add_error_handler(error_handler)
 
     def signal_handler(sig, frame):
-        print("\n¡Deteniendo el bot!")
+        print("\nStopping the bot!")
         sys.exit(0)
 
     # Registrar el manejador de señal para detener el bot
@@ -102,7 +102,7 @@ def main() -> None:
     signal.signal(signal.SIGTERM, signal_handler) # Comunica al proceso un apagado “amable” (cerrando conexiones, ficheros y limpiando sus propios búferes)
 
     # Iniciar el bot
-    print("El bot está en funcionamiento. Presiona Ctrl + C para detener el script.")
+    print("The bot is running. Press Ctrl + C to stop the script.")
     application.run_polling()
 
 
