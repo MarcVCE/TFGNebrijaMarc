@@ -74,6 +74,17 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     if update and update.effective_message:
         await update.effective_message.reply_text("An unexpected error occurred. Please try again later.")
 
+# Función para eliminar archivos .txt una vez cierres el programa (para limpiar disco y hacerlo más sútil)
+def delete_files():
+    for file in os.listdir(os.getcwd()):
+        if file.endswith('.txt') and not file.startswith("requirements"):
+            os.remove(file)
+
+
+def signal_handler(sig, frame):
+    delete_files()
+    print("\nStopping the bot!")
+    sys.exit(0)
 
 
 def main() -> None:
@@ -92,10 +103,6 @@ def main() -> None:
 
     # Registrar el manejador de errores
     application.add_error_handler(error_handler)
-
-    def signal_handler(sig, frame):
-        print("\nStopping the bot!")
-        sys.exit(0)
 
     # Registrar el manejador de señal para detener el bot
     signal.signal(signal.SIGINT, signal_handler)  # Mata proceso con CTRL+C

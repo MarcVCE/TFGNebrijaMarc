@@ -6,7 +6,9 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 from myaudiototext import audio_to_text
 from mytexttoaudio import text_to_audio
-from scraping import handle_scrapear, handle_scrapear_enlace, handle_resumen
+from scraping import (handle_scraping_answer_telegram, 
+                      handle_scraping_link_answer_telegram, 
+                      handle_abstract_answer_telegram)
 
 # Configurar el registro
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -24,7 +26,7 @@ available_languages = {
 
 # Función para formatear la respuesta
 def format_answer(text):
-    return re.sub(r"•", " *", text).replace("\n", "\n *")
+    return re.sub(r"•", " *", text).replace("\n", "")
 
 async def process_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> tuple:
     language = "es-ES"  # Por defecto en español
@@ -56,13 +58,13 @@ async def process_message(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
 async def handle_specific_commands(update: Update, context: ContextTypes.DEFAULT_TYPE, received_text: str) -> bool:
     if received_text.startswith('scrape:'):
-        await handle_scrapear(update, context)
+        await handle_scraping_answer_telegram(update, context)
         return True
-    elif received_text.startswith('summary:'):
-        await handle_resumen(update, context)
+    elif received_text.startswith('abstract:'):
+        await handle_abstract_answer_telegram(update, context)
         return True
     elif received_text.startswith('scrape_link:'):
-        await handle_scrapear_enlace(update, context)
+        await handle_scraping_link_answer_telegram(update, context)
         return True
     return False
 
