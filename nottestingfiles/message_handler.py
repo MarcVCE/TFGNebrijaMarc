@@ -6,9 +6,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 from myaudiototext import audio_to_text
 from mytexttoaudio import text_to_audio
-from scraping import (handle_scraping_answer_telegram, 
-                      handle_scraping_link_answer_telegram, 
-                      handle_abstract_answer_telegram)
+from summarylinks import extract_information_json, generate_summary_from_abstract
 
 # Configurar el registro
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -24,11 +22,7 @@ available_languages = {
     "en": "en-GB"   # inglés
 }
 
-# Función para formatear la respuesta
-def format_answer(text):
-    return re.sub(r"•", " *", text).replace("\n", "")
-
-async def process_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> tuple:
+async def process_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     language = "es-ES"  # Por defecto en español
     received_text = ""
 
@@ -53,20 +47,7 @@ async def process_message(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     
     context.user_data['received_text'] = received_text
     context.user_data['language'] = language
-    return received_text, language
-
-
-async def handle_specific_commands(update: Update, context: ContextTypes.DEFAULT_TYPE, received_text: str) -> bool:
-    if received_text.startswith('scrape:'):
-        await handle_scraping_answer_telegram(update, context)
-        return True
-    elif received_text.startswith('abstract:'):
-        await handle_abstract_answer_telegram(update, context)
-        return True
-    elif received_text.startswith('scrape_link:'):
-        await handle_scraping_link_answer_telegram(update, context)
-        return True
-    return False
+    # return received_text, language
 
 
 async def ask_answer_preference(update: Update) -> None:
@@ -75,7 +56,8 @@ async def ask_answer_preference(update: Update) -> None:
         [InlineKeyboardButton("Audio", callback_data='audio')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text("How would you like to receive the answer?", reply_markup=reply_markup)
+    question_text = "How would you like to receive the answer?"
+    await update.message.reply_text(text=question_text, reply_markup=reply_markup)
 
 
 async def generate_and_send_answer(
@@ -97,7 +79,20 @@ async def generate_and_send_answer(
             text_to_audio(answer=answer_text, language=language)
             await update.message.reply_voice(voice=open(file='respuesta.mp3', mode='rb'))
         except Exception as e:
-            logger.error("Error converting text to audio:", exc_info=e)
-            await update.message.reply_text("Error converting text to audio:")
+            error_text = "Error converting text to audio:"
+            logger.error(msg=error_text, exc_info=e)
+            await update.message.reply_text(text=error_text)
     else:
-        await update.message.reply_text(format_answer(text=answer_text))
+        await update.message.reply_text(text=answer_text)
+
+
+async def send_summaries_telegram(update: Update, 
+                                  context: ContextTypes.DEFAULT_TYPE):
+    titles_abstracts_and_links = extract_information_json()
+    response_summaries = ""
+    for i, (title, abstract, link) in enumerate(titles_abstracts_and_links, start=1):
+        # print(f"{i}. '{title}'\nTexto Original: {abstract}\nResumen Generado: {generate_summary_from_abstract(abstract)}\n")
+        summary_from_abstract : str = generate_summary_from_abstract(abstract)
+        response_summaries += f"{i}. *{title}*\n{summary_from_abstract.capitalize()}\n\n"
+    
+    await update.message.reply_text(text=response_summaries, parse_mode="Markdown")
