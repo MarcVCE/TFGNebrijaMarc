@@ -9,7 +9,7 @@ from telegram.ext import (Application, CommandHandler, MessageHandler,
                           filters, ContextTypes, CallbackQueryHandler)
 from message_handler import (process_message ,generate_and_send_answer, 
                              ask_answer_preference, send_summaries_telegram)
-from scraping import (handle_abstract_answer_telegram, handle_scraping_answer_telegram, 
+from scraping import (handle_articles_apa_answer_telegram, handle_scraping_answer_telegram, 
                       handle_scraping_link_answer_telegram)
 
 # Configurar el registro
@@ -42,6 +42,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "Example: /summaries_abstracts\n\n"
         "/scrape_link <link> - Scrape a specific link\n"
         "Example: /scrape_link https://pubmed.ncbi.nlm.nih.gov/34127285/\n\n"
+        "/articles_apa - Extract the apa format of the articles, needs to do /scrape <search term> before for the local json creation\n"
+        "Example: /articles_apa\n\n"
         "For more information on how to use this bot, please visit the Gemini API documentation: https://gemini.google.com/.\n"
         "This bot works with the Google Gemini API. Please avoid asking unethical questions. Thank you!"
     )
@@ -99,8 +101,8 @@ def main() -> None:
                                            callback=start))
     application.add_handler(CommandHandler(command="scrape", 
                                            callback=handle_scraping_answer_telegram))
-    application.add_handler(CommandHandler(command="abstract", 
-                                           callback=handle_abstract_answer_telegram))
+    application.add_handler(CommandHandler(command="articles_apa", 
+                                           callback=handle_articles_apa_answer_telegram))
     application.add_handler(CommandHandler(command="scrape_link", 
                                            callback=handle_scraping_link_answer_telegram))
     application.add_handler(CommandHandler(command="summaries_abstracts", 

@@ -1,5 +1,4 @@
 import logging
-import re
 import google.generativeai as genai
 import langid
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -47,7 +46,6 @@ async def process_message(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     
     context.user_data['received_text'] = received_text
     context.user_data['language'] = language
-    # return received_text, language
 
 
 async def ask_answer_preference(update: Update) -> None:
@@ -88,11 +86,13 @@ async def generate_and_send_answer(
 
 async def send_summaries_telegram(update: Update, 
                                   context: ContextTypes.DEFAULT_TYPE):
+    waiting_message = '_🤖⏳ Our Artificial Intelligence model is working on your task_'
+    my_waiting_message = await update.message.reply_text(text=waiting_message, parse_mode="Markdown")
     titles_abstracts_and_links = extract_information_json()
     response_summaries = ""
     for i, (title, abstract, link) in enumerate(titles_abstracts_and_links, start=1):
-        # print(f"{i}. '{title}'\nTexto Original: {abstract}\nResumen Generado: {generate_summary_from_abstract(abstract)}\n")
         summary_from_abstract : str = generate_summary_from_abstract(abstract)
         response_summaries += f"{i}. *{title}*\n{summary_from_abstract.capitalize()}\n\n"
     
     await update.message.reply_text(text=response_summaries, parse_mode="Markdown")
+    await update.message.delete(api_kwargs={"message_id":my_waiting_message.message_id})
