@@ -12,7 +12,7 @@ Este es un proyecto de Inteligencia Artificial. Sigue los pasos a continuación 
 ### 1. Crear un entorno virtual con Conda:
 
 ```bash
-conda create -n ia python=3.10
+conda create -n ia python=3.12
 ```
 
 ### 2. Activar el entorno virtual:
