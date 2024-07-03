@@ -7,5 +7,4 @@ services:
       - TELEGRAM_API_TOKEN=${TELEGRAM_API_TOKEN}
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
       - CLOUD_API=${CLOUD_API}
-    command: 
-      python main.py
+    command: python main.py

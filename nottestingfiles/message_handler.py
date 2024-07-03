@@ -91,7 +91,7 @@ async def send_summaries_telegram(update: Update,
     titles_abstracts_and_links = extract_information_json()
     response_summaries = ""
     for i, (title, abstract, link) in enumerate(titles_abstracts_and_links, start=1):
-        summary_from_abstract : str = generate_summary_from_abstract(abstract)
+        summary_from_abstract : str = generate_summary_from_abstract(text=abstract, max_chars_answer=256)
         response_summaries += f"{i}. *{title}*\n{summary_from_abstract.capitalize()}\n\n"
     
     await update.message.reply_text(text=response_summaries, parse_mode="Markdown")
