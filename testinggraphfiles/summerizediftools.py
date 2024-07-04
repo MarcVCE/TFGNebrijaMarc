@@ -4,7 +4,7 @@ from transformers import BertTokenizer, EncoderDecoderModel, pipeline
 from difflib import SequenceMatcher
 import matplotlib.pyplot as plt
 
-# Descargar recursos necesarios de NLTK, en este caso el punkt que es para sentence tokenizer
+# Descargar recursos necesarios de NLTK
 download('punkt')
 
 # Función para cargar el archivo JSON
@@ -14,7 +14,7 @@ def load_file(file_path):
     return content
 
 # Función para extraer título, abstract y enlace
-def extract_title_abstract_and_link(article):
+def extract_title_abstract_and_link(article : str):
     title_text = article["title"]
     title = title_text.strip() if title_text else None
     link_text = article["link"]
@@ -23,38 +23,80 @@ def extract_title_abstract_and_link(article):
     abstract = abstract_text.strip() if abstract_text else None
     return title, abstract, link
 
-# Función para generar resumen con NLTK
-def generate_summary_nltk(text, max_chars):
-    # La función sent_tokenize se utiliza para dividir un texto en oraciones(sentence),
-    # mientras que word_tokenize se utiliza para dividir un texto en palabras
-    sentences = tokenize.sent_tokenize(text)
-    resumen = '' 
+# Función para calcular la frecuencia de las palabras
+def calculate_word_frequencies(text : str):
+    words = tokenize.word_tokenize(text.lower())
+    frequency_word_table = {}
+    for word in words:
+        if word.isalnum():  # Considerar solo palabras alfanuméricas
+            if word in frequency_word_table:
+                frequency_word_table[word] = frequency_word_table[word] + 1
+            else:
+                frequency_word_table[word] = 1
+
+    return frequency_word_table
+
+# Función para puntuar las oraciones
+def score_sentences(sentences : list[str], frequency_word_table):
+    sentence_scores = {}
+    for i, sentence in enumerate(sentences):
+        words = tokenize.word_tokenize(sentence.lower())
+        sentence_score = 0
+        for word in words:
+            if word in frequency_word_table:
+                sentence_score = sentence_score + frequency_word_table[word]
+
+        # Añadir importancia de la posición (las primeras oraciones tienen más peso)
+        bonus_value_per_start_sentence = (1 / (i + 1))
+        sentence_scores[sentence] = sentence_score * bonus_value_per_start_sentence
+
     
-    for sentence in sentences:
-        resumen += ' ' + sentence
-        if len(resumen) >= max_chars:
+    return sentence_scores
+
+# Función para generar resumen basado en frecuencia de palabras
+def generate_summary_nltk(text, max_chars):
+    sentences = tokenize.sent_tokenize(text)
+    if not sentences:
+        return ""
+    
+    frequency_word_table = calculate_word_frequencies(text)
+    sentence_scores = score_sentences(sentences, frequency_word_table)
+    
+    # Ordenar las oraciones por puntuación
+    ranked_sentences = sorted(sentence_scores, key=sentence_scores.get, reverse=True)
+    
+    summary = ""
+    for sentence in ranked_sentences:
+        if len(sentence) <= max_chars:
+            summary = summary + ' ' + sentence
+        else:
+            summary = summary + ' ' + sentence
+            summary = summary[1:max_chars + 1]
             break
     
-    resumen = resumen[1:max_chars+1]  #Para quitar el espacio inicial
-    return resumen
+    return summary
 
-# Función para generar resumen con BERT
+# Función para generar resumen con BERT    (Transformadores ahora mismo es el state-of-art de NLP)
 def generate_summary_transformers_bert(text, max_chars):
     model_name = "patrickvonplaten/bert2bert_cnn_daily_mail"
-    model = EncoderDecoderModel.from_pretrained(model_name)
-    tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
-    
-    inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=512)
-    summary_ids = model.generate(inputs["input_ids"], num_beams=4, early_stopping=True)
-    summary = tokenizer.decode(summary_ids[0], skip_special_tokens=True)
-    
+    model : EncoderDecoderModel = EncoderDecoderModel.from_pretrained(model_name)
+    tokenizer : BertTokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+
+    inputs = tokenizer(text=text, return_tensors="pt", truncation=True, max_length=512)
+    summary_ids = model.generate(inputs=inputs["input_ids"], num_beams=4, early_stopping=True)
+    summary = tokenizer.decode(token_ids=summary_ids[0], skip_special_tokens=True)
+
     summary = summary[:max_chars]
     return summary
+
+
 
 # Función para generar resumen con Facebook BART
 def generate_summary_transformers_facebook(text, max_chars):
     summarizer = pipeline(task="summarization", model="facebook/bart-large-cnn")
-    summary = summarizer(text, max_length=1024, min_length=30, do_sample=False)
+    # do_sample=False desactiva el muestreo aleatorio. Se usa la 
+    # estrategia de beam search para generar el resumen más probable. (como el num_beans = 4)
+    summary = summarizer(text, max_length=1024, do_sample=False)
     summary_text = summary[0]['summary_text']
     
     summary_text = summary_text[:max_chars]
@@ -113,9 +155,9 @@ if __name__ == "__main__":
         })
         
         print(f"{i}. '{title}'\n")
-        print(f"Resumen NLTK (200 chars):\n{len(nltk_summary)}\n")
-        print(f"Resumen BERT (200 chars):\n{len(bert_summary)}\n")
-        print(f"Resumen Facebook (200 chars):\n{len(facebook_summary)}\n")
+        print(f"Resumen NLTK (200 chars):\n{nltk_summary}\n")
+        print(f"Resumen BERT (200 chars):\n{bert_summary}\n")
+        print(f"Resumen Facebook (200 chars):\n{facebook_summary}\n")
         print("Enlace:", link)
         print("\n" + "-"*80 + "\n")
 
@@ -129,7 +171,7 @@ if __name__ == "__main__":
     
     plt.figure(figsize=(14, 7))
     
-    plt.plot(x, original_nltk, label='NLTK', marker='o')
+    plt.plot(x, original_nltk, label='NLTK', marker='o', linestyle='--')
     plt.plot(x, original_bert, label='BERT', marker='s')
     plt.plot(x, original_facebook, label='Facebook', marker='^')
     

@@ -8,7 +8,7 @@ def load_file(file_path):
     return content
 
 
-def extract_title_abstract_and_link(article):
+def extract_title_abstract_and_link(article : str):
     title_text = article["title"]
     title = title_text.strip() if title_text else None
     link_text = article["link"]
@@ -18,10 +18,10 @@ def extract_title_abstract_and_link(article):
     return title, abstract, link
 
 
-def calculate_avg_token_length(text, tokenizer):
+def calculate_avg_token_length(text, tokenizer : BertTokenizer):
     total_value_tokens = 0
     total_tokens = 0
-    tokens = tokenizer.tokenize(text) # Con el tokenizador
+    tokens = tokenizer.tokenize(text=text) # Con el tokenizador
     total_value_tokens = sum(len(token) for token in tokens) # Ejemplo tokens = [9, 24, 31 , etc] = yo que sé,
                                                              # suma de valores 250
     total_tokens = len(tokens)  # Ejemplo: Hay 45 tokens en esa lista de tokens 
@@ -32,14 +32,16 @@ def calculate_avg_token_length(text, tokenizer):
 
 def generate_summary_from_abstract(text, max_chars_answer):
     # Cargar el modelo y el tokenizador
-    model = EncoderDecoderModel.from_pretrained(
-        pretrained_model_name_or_path="patrickvonplaten/bert2bert_cnn_daily_mail") # fine tuned from bert model
-    tokenizer = BertTokenizer.from_pretrained(
+    model_name = "patrickvonplaten/bert2bert_cnn_daily_mail"
+    model : EncoderDecoderModel = EncoderDecoderModel.from_pretrained(
+        pretrained_model_name_or_path=model_name) # fine tuned from bert model
+    tokenizer : BertTokenizer = BertTokenizer.from_pretrained(
         pretrained_model_name_or_path="bert-base-uncased")
-    
+
+
     # Tokenizar el texto, in bert tokenizers, it's truly either 256 or 512 per tokenizer model
     max_tokens_allowed_to_tokenize_per_text_input = 512
-    inputs = tokenizer(text, max_length=max_tokens_allowed_to_tokenize_per_text_input, 
+    inputs = tokenizer(text=text, max_length=max_tokens_allowed_to_tokenize_per_text_input, 
                        truncation=True, return_tensors="pt") # Lo haces de esta forma y no con .tokenize porque es la única forma que
                                                              # acepta otros parámetros que no son simplemente el texto, pero la forma
                                                              # correcta si fuese sólo texto es con .tokenize, como en el otro uso que
@@ -51,13 +53,13 @@ def generate_summary_from_abstract(text, max_chars_answer):
     established_max_output_tokens = math.ceil(max_chars_answer / avg_token_length)
     
     # Generar el resumen
-    summaries_ids = model.generate(inputs["input_ids"], max_length=established_max_output_tokens, 
+    summaries_ids = model.generate(inputs=inputs["input_ids"], max_length=established_max_output_tokens, 
                                    num_beams=4, early_stopping=True)
-    summary = tokenizer.decode(summaries_ids[0], skip_special_tokens=True)
+    summary = tokenizer.decode(token_ids=summaries_ids[0], skip_special_tokens=True)
 
      
     # Verificar que el resumen no exceda el límite de caracteres y ajustar si es necesario
-    if len(summary) > max_chars_answer or summary[-1] is not ".":
+    if len(summary) > max_chars_answer or summary[-1] != ".":
         # Recortar el resumen al límite de caracteres especificado
         trunc_summary = summary[:max_chars_answer]
         # Buscar el último delimitador de oración antes del límite de caracteres
