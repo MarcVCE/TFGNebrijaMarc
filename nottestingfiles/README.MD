@@ -177,3 +177,10 @@ python main.py
 ```
 
 
+## Activación
+En caso de usar el entorno virtual con pip y venv (desconzco si pasa lo mismo con conda), es bastante
+importante hacer CTRL+Shift+P en Visual Studio, y seleccionar el intérprete del entorno virtual que quieras
+utilizar, el intérprete se encuentra o bien en .\venv\Scripts\python.exe  , si tu carpeta virtual 
+se llama venv o bien .\env\Scripts\python.exe, si tu carpeta virtual se llama env
+
+

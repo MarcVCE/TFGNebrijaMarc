@@ -90,7 +90,6 @@ def generate_summary_transformers_bert(text, max_chars):
     return summary
 
 
-
 # Función para generar resumen con Facebook BART
 def generate_summary_transformers_facebook(text, max_chars):
     summarizer = pipeline(task="summarization", model="facebook/bart-large-cnn")
@@ -101,10 +100,6 @@ def generate_summary_transformers_facebook(text, max_chars):
     
     summary_text = summary_text[:max_chars]
     return summary_text
-
-# Función para ajustar el tamaño del resumen a un número exacto de caracteres
-def adjust_summary_length(summary, max_chars):
-    return summary[:max_chars]
 
 # Función para calcular similitud entre textos
 def calculate_similarity(text1, text2):
@@ -129,18 +124,6 @@ if __name__ == "__main__":
         nltk_summary = generate_summary_nltk(text=summary, max_chars=200)
         bert_summary = generate_summary_transformers_bert(text=summary, max_chars=200)
         facebook_summary = generate_summary_transformers_facebook(text=summary, max_chars=200)
-        
-        # Ajustar los resúmenes a 200 caracteres exactos
-        nltk_summary = adjust_summary_length(nltk_summary, 200)
-        bert_summary = adjust_summary_length(bert_summary, 200)
-        facebook_summary = adjust_summary_length(facebook_summary, 200)
-        
-        if len(nltk_summary) != 200:
-            print(f"Problema al generar resumen con NLTK para el artículo {i}")
-        if len(bert_summary) != 200:
-            print(f"Problema al generar resumen con BERT para el artículo {i}")
-        if len(facebook_summary) != 200:
-            print(f"Problema al generar resumen con Facebook para el artículo {i}")
         
         original_nltk = 1 - calculate_similarity(summary, nltk_summary)
         original_bert = 1 - calculate_similarity(summary, bert_summary)
