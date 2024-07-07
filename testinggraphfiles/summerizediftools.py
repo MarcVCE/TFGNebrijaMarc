@@ -53,6 +53,12 @@ def score_sentences(sentences : list[str], frequency_word_table):
     
     return sentence_scores
 
+
+# Función para ordenar oraciones basado en su puntuación
+def sort_sentences_by_score(sentence_scores : dict):
+    return sorted(sentence_scores, key=sentence_scores.get, reverse=True)
+
+
 # Función para generar resumen basado en frecuencia de palabras
 def generate_summary_nltk(text, max_chars):
     sentences = tokenize.sent_tokenize(text)
@@ -63,7 +69,7 @@ def generate_summary_nltk(text, max_chars):
     sentence_scores = score_sentences(sentences, frequency_word_table)
     
     # Ordenar las oraciones por puntuación
-    ranked_sentences = sorted(sentence_scores, key=sentence_scores.get, reverse=True)
+    ranked_sentences = sort_sentences_by_score(sentence_scores=sentence_scores)
     
     summary = ""
     for sentence in ranked_sentences:
