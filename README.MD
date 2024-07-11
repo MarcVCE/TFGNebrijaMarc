@@ -1,4 +1,7 @@
+![Código Correcto](https://img.shields.io/badge/c%C3%B3digo-correcto-brightgreen) 
+![Depuración Correcta](https://img.shields.io/badge/debbuging-correct-brightgreen)
 
+![Representación de IA](https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%3Fid%3DOIP.43MCcgwhXrJY59twDinlfQAAAA%26pid%3DApi&f=1&ipt=8da7144a4c0aed1037934e4dc51251cff7522231dd18ebba35e50e49431c852d&ipo=images)
 
 # Proyecto de IA
 

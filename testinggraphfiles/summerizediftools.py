@@ -33,7 +33,7 @@ def calculate_word_frequencies(text : str):
                 frequency_word_table[word] = frequency_word_table[word] + 1
             else:
                 frequency_word_table[word] = 1
-
+    
     return frequency_word_table
 
 # Función para puntuar las oraciones
@@ -50,7 +50,6 @@ def score_sentences(sentences : list[str], frequency_word_table):
         bonus_value_per_start_sentence = (1 / (i + 1))
         sentence_scores[sentence] = sentence_score * bonus_value_per_start_sentence
 
-    
     return sentence_scores
 
 
@@ -79,7 +78,7 @@ def generate_summary_nltk(text, max_chars):
             summary = summary + ' ' + sentence
             summary = summary[1:max_chars + 1]
             break
-    
+        
     return summary
 
 # Función para generar resumen con BERT    (Transformadores ahora mismo es el state-of-art de NLP)
