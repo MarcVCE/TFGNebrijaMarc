@@ -50,53 +50,55 @@ results = {
     "Chardet": []
 }
 
-for text in texts:
-    print(f"Text: {text}")
-    
-    # Detect language with langid
-    language_langid, probability_langid = detect_with_langid(text)
-    results["Langid"].append((language_langid, probability_langid))
-    print(f"Langid: {language_langid} with probability {probability_langid}")
-    
-    # Detect language with langdetect
-    detections_langdetect = detect_with_langdetect(text)
-    if detections_langdetect:
-        results["Langdetect"].append(detections_langdetect[0])  # Suponiendo que tomamos el más probable
-        for language, probability in detections_langdetect:
-            print(f"Langdetect: {language} with probability {probability}")
-    else:
-        print("Langdetect: Detection failed.")
-    
-    # Detect language with guess_language
-    lang_guess_language, _ = detect_with_guess_language(text)
-    results["GuessLanguage"].append(lang_guess_language)
-    print(f"GuessLanguage: {lang_guess_language}")
-    
-    # Detect language with chardet
-    encoding_chardet, confidence_chardet = detect_with_chardet(text)
-    results["Chardet"].append((encoding_chardet, confidence_chardet))
-    print(f"Chardet: {encoding_chardet} with confidence {confidence_chardet}")
 
-# Preparar datos para el gráfico
-texts_labels = results["Text"]
-langid_probabilities = [probability for _, probability in results["Langid"]]
-langdetect_probabilities = [probability for _, probability in results["Langdetect"]]
-chardet_probabilities = [confidence for _, confidence in results["Chardet"]]
+if __name__ == "__main__":
+    for text in texts:
+        print(f"Text: {text}")
+        
+        # Detect language with langid
+        language_langid, probability_langid = detect_with_langid(text)
+        results["Langid"].append((language_langid, probability_langid))
+        print(f"Langid: {language_langid} with probability {probability_langid}")
+        
+        # Detect language with langdetect
+        detections_langdetect = detect_with_langdetect(text)
+        if detections_langdetect:
+            results["Langdetect"].append(detections_langdetect[0])  # Suponiendo que tomamos el más probable
+            for language, probability in detections_langdetect:
+                print(f"Langdetect: {language} with probability {probability}")
+        else:
+            print("Langdetect: Detection failed.")
+        
+        # Detect language with guess_language
+        lang_guess_language, _ = detect_with_guess_language(text)
+        results["GuessLanguage"].append(lang_guess_language)
+        print(f"GuessLanguage: {lang_guess_language}")
+        
+        # Detect language with chardet
+        encoding_chardet, confidence_chardet = detect_with_chardet(text)
+        results["Chardet"].append((encoding_chardet, confidence_chardet))
+        print(f"Chardet: {encoding_chardet} with confidence {confidence_chardet}")
 
-# Crear el gráfico comparativo
-x = range(len(texts_labels))
+    # Preparar datos para el gráfico
+    texts_labels = results["Text"]
+    langid_probabilities = [probability for _, probability in results["Langid"]]
+    langdetect_probabilities = [probability for _, probability in results["Langdetect"]]
+    chardet_probabilities = [confidence for _, confidence in results["Chardet"]]
 
-plt.figure(figsize=(14, 7))
+    # Crear el gráfico comparativo
+    x = range(len(texts_labels))
 
-plt.plot(x, langid_probabilities, label='Langid', marker='o')
-plt.plot(x, langdetect_probabilities, label='Langdetect', marker='s')
-plt.plot(x, chardet_probabilities, label='Chardet', marker='^')
+    plt.figure(figsize=(14, 7))
 
-plt.xlabel('Text')
-plt.ylabel('Probability/Confidence')
-plt.title('Comparative Language Detection Probabilities by Text')
-plt.xticks(x, texts_labels, rotation=45)
-plt.legend()
-plt.tight_layout()
-plt.grid(True)
-plt.show()
+    plt.plot(x, langid_probabilities, label='Langid', marker='o')
+    plt.plot(x, langdetect_probabilities, label='Langdetect', marker='s')
+    plt.plot(x, chardet_probabilities, label='Chardet', marker='^')
+
+    plt.xlabel('Text')
+    plt.ylabel('Probability/Confidence')
+    plt.title('Comparative Language Detection Probabilities by Text')
+    plt.xticks(x, texts_labels, rotation=45)
+    plt.legend()
+    plt.tight_layout()
+    plt.grid(True)
+    plt.show()

@@ -133,6 +133,53 @@ CLOUD_API=xxxx
 ```
 
 
+## Pruebas Tests de carpeta testinggraphfiles
+
+Para sacar resultados (no tests o cobertura) de los ficheros que no son tests (sin _test en su nombre de archivo) , simplemente se corren con 
+
+```bash
+
+python nombrearchivo.py
+
+```
+
+dentro de la carpeta en la terminal de VSC. Una vez dicho esto:
+
+  Antes que nada, lo más vital es hacer una cobertura de los archivos de test que hay en la carpeta, si no,
+  los comandos posteriores no funcionarán dado que no hay data.
+  Con este comando  
+  
+```bash
+
+coverage run -m pytest
+
+```
+
+Se muestra por terminal el porcentaje de cobertura que se ha producido en los archivos _test.
+Una vez con esto, hay data para hacer un 
+
+```bash
+
+coverage report
+
+```
+  
+ para mostrar por terminal la cobertura de todos los archivos de esa carpeta, y de forma más
+ detallada que la anterior,dado que en la respuesta también hay parámetros adicionales que se tienen en cuenta.
+
+Si lo que se quiere es la cobertura más precisa y detallada que se puede lograr, se puede hacer un 
+
+```bash
+
+coverage html
+
+```
+
+Es el que utilicé para generar la carpeta de html. En el index.html realmente es dónde está todo. 
+
+
+
+
   
 
 ## Uso
