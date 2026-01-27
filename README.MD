@@ -5,7 +5,7 @@
 
 # Proyecto de IA
 
-  
+![Image](https://github.com/user-attachments/assets/fbc284ac-d302-48af-9665-9ed63b9afa61)
 
 Este es un proyecto de Inteligencia Artificial. Sigue los pasos a continuación para configurar y ejecutar el proyecto. Hay dos formas de crear tu entorno virtual, o con conda, o con venv.
 
