@@ -1,233 +1,128 @@
-![Código Correcto](https://img.shields.io/badge/c%C3%B3digo-correcto-brightgreen) 
-![Depuración Correcta](https://img.shields.io/badge/debbuging-correct-brightgreen)
+![Code Correct](https://img.shields.io/badge/code-correct-brightgreen) 
+![Debugging Correct](https://img.shields.io/badge/debugging-correct-brightgreen)
 
-![Representación de IA](https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%3Fid%3DOIP.43MCcgwhXrJY59twDinlfQAAAA%26pid%3DApi&f=1&ipt=8da7144a4c0aed1037934e4dc51251cff7522231dd18ebba35e50e49431c852d&ipo=images)
+# 🤖 AI-Powered Scientific Text Summarization & Multimedia Processing Pipeline
 
-# Proyecto de IA
+A comprehensive AI-driven system that integrates web scraping, natural language processing, and multimedia generation to summarize scientific articles and generate representative images. This pipeline automates data extraction from PubMed, processes text and audio inputs, and delivers outputs through a Telegram bot interface.
+
+---
+
+## 🚀 Project Overview
 
 ![Image](https://github.com/user-attachments/assets/fbc284ac-d302-48af-9665-9ed63b9afa61)
 
-Este es un proyecto de Inteligencia Artificial. Sigue los pasos a continuación para configurar y ejecutar el proyecto. Hay dos formas de crear tu entorno virtual, o con conda, o con venv.
+This project combines multiple technologies to create a versatile tool that:
 
-  
+- Scrapes scientific articles and abstracts from PubMed.
+- Processes audio and text inputs with language detection.
+- Uses advanced AI models such as Google BERT for summarization of abstracts and APA-formatted articles.
+- Generates JSON outputs with clean, non-repetitive information extracted from scientific texts.
+- Selects and processes outputs as either audio or text using Google Gemini AI.
+- Deploys the entire pipeline within Docker for easy setup and scalability.
+- Provides a Telegram bot interface for user interaction.
 
-## Requisitos
+---
 
-  
+## 🛠️ Technologies Used
 
-- [Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html)
+- **Python** — Core programming language.
+- **Web Scraping** — Extraction of scientific articles from PubMed.
+- **Google BERT** — State-of-the-art NLP model for text summarization.
+- **Google Gemini** — AI for generating audio or text outputs.
+- **Docker** — Containerization for deployment and scalability.
+- **Telegram Bot API** — User interface for command inputs and outputs.
+- **Language Detection** — Automatically detects input language to route processing accordingly.
 
-- [Docker](https://docs.docker.com/get-docker/)
+---
 
-- [Python](https://www.python.org/downloads/release/python-3122/)
+## 📦 Installation
 
-  
-  
+> Note: Using Docker is highly recommended to simplify setup.
 
-## Instalación (No haría falta hacer esta sección si lo despliegas con docker)
+### Using Docker
 
-  
-
-### 1. Crear un entorno virtual con Conda:
-
-  
-
-```bash
-
-conda  create  -n  ia  python=3.12
-
-```
-
-  
-
-### 2. Activar el entorno virtual:
-
-  
+1. Build and run the container for the first time:
 
 ```bash
-
-conda  activate  ia
-
+docker compose up --build
 ```
 
-  
-
-### 3. Instalación de dependencias
-
-  
-
-Puedes instalar las dependencias automáticamente usando un archivo `requirements.txt` o manualmente una por una.
-
-  
-
-#### Instalación automática:
-
-  
+2. For subsequent runs:
 
 ```bash
-
-pip  install  -r  requirements.txt
-
+docker compose up
 ```
 
-  
+### Without Docker
 
-#### Instalación manual:
+1. Set up a Python virtual environment using Conda or venv.
 
-  
+2. Install dependencies:
 
 ```bash
-
-pip  install  python-telegram-bot==21.1.1
-
-pip  install  python-dotenv
-
-pip  install  -U  google-generativeai
-
-pip  install  prompt-toolkit==3.0.28
-
-pip  install  ipython
-
-etc
-
+pip install -r requirements.txt
 ```
 
-  
+3. Configure API keys in `.env` (see Configuration section).
 
-## Configuración
+4. Run the project:
 
-  
+```bash
+python main.py
+```
 
-### 1. Crear algunas de tus API keys:
+---
 
-  
+## ⚙️ Configuration
+
+1. Obtain API keys for:
 
 - [Google AI Studio](https://aistudio.google.com/app/apikey)
+- [Telegram BotFather](https://t.me/BotFather)
+- [Google Cloud Console](https://console.cloud.google.com)
 
-- [BotFather en Telegram](https://t.me/BotFather)
-
-- [Consola Google Cloud](https://console.cloud.google.com)
-
-  
-
-### 2. Configurar el archivo de entorno:
-
-  
-
-1. Cambia el `.env.sample` por `.env` en el directorio raíz del proyecto.
-
-2. Edita el archivo `.env` y agrega tus claves/token.
-
-  
+2. Rename `.env.sample` to `.env` and add your API credentials:
 
 ```env
-
-# Ejemplo de contenido del archivo .env
-
-TELEGRAM_API_TOKEN=xxx
-
-GOOGLE_API_KEY=xxxx
-
-CLOUD_API=xxxx
-
+TELEGRAM_API_TOKEN=your_token_here
+GOOGLE_API_KEY=your_key_here
+CLOUD_API=your_cloud_api_here
 ```
 
+---
 
-## Pruebas Tests de carpeta testinggraphfiles
+## 🧪 Testing
 
-Para sacar resultados (no tests o cobertura) de los ficheros que no son tests (sin _test en su nombre de archivo) , simplemente se corren con 
+- To run individual scripts from `testinggraphfiles` (non-test files), execute:
 
 ```bash
-
-python nombrearchivo.py
-
+python filename.py
 ```
 
-dentro de la carpeta en la terminal de VSC. Una vez dicho esto:
+- For test coverage:
 
-  Antes que nada, lo más vital es hacer una cobertura de los archivos de test que hay en la carpeta, si no,
-  los comandos posteriores no funcionarán dado que no hay data.
-  Con este comando  
-  
 ```bash
-
 coverage run -m pytest
-
-```
-
-Se muestra por terminal el porcentaje de cobertura que se ha producido en los archivos _test.
-Una vez con esto, hay data para hacer un 
-
-```bash
-
 coverage report
-
-```
-  
- para mostrar por terminal la cobertura de todos los archivos de esa carpeta, y de forma más
- detallada que la anterior,dado que en la respuesta también hay parámetros adicionales que se tienen en cuenta.
-
-Si lo que se quiere es la cobertura más precisa y detallada que se puede lograr, se puede hacer un 
-
-```bash
-
 coverage html
-
 ```
 
-Es el que utilicé para generar la carpeta de html. En el index.html realmente es dónde está todo. 
+---
 
+## 🔍 Usage
 
+Interact with the project via Telegram commands.
 
+- If running with Docker, follow the Docker usage instructions above.
+- Without Docker, run `python main.py` after configuration.
 
-  
+---
 
-## Uso
+## 💡 Additional Notes
 
- - *Uso con docker :*
+- When using virtual environments with pip/venv, ensure to select the correct Python interpreter in your IDE (e.g., VSCode).
+- The project intelligently routes input based on command usage to either web scraping or multimedia processing.
+- Outputs can be audio or text, depending on user selection.
+- For virtual environments with `venv` or `pip`, make sure the interpreter points to `.venv/Scripts/python.exe` (or `.env/Scripts/python.exe` depending on your folder name) in your IDE.
 
-  ### Inicializar el proyecto con Docker
-
-  
-
-Para construir y ejecutar el contenedor Docker por primera vez, utiliza el siguiente comando:
-
-  
-  
-
-```bash
-
-docker  compose  up  --build
-
-```
-
-  
-
-Una vez que el contenedor ha sido creado, para inicializar el contenedor en las siguientes veces, simplemente utiliza:
-
-  
-  
-
-```bash
-
-docker  compose  up
-
-```
-
- - *Uso sin docker :*
-
-  ### Inicializar el proyecto sin Docker
-
-Para inicializar sin docker, se debe configurar el proyecto como se especifica en el apartado configuración y
-corre desde la carpeta dónde está el proyecto:
-```bash
-
-python main.py
-
-```
-
-## Activación
-En caso de usar el entorno virtual con pip y venv (desconzco si pasa lo mismo con conda), es bastante
-importante hacer CTRL+Shift+P en Visual Studio, y seleccionar el intérprete del entorno virtual que quieras
-utilizar, el intérprete se encuentra o bien en .\venv\Scripts\python.exe  , si tu carpeta virtual 
-se llama venv o bien .\env\Scripts\python.exe , si tu carpeta virtual se llama env
+---
