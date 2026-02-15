@@ -1,9 +1,9 @@
 ![Code Correct](https://img.shields.io/badge/code-correct-brightgreen) 
 ![Debugging Correct](https://img.shields.io/badge/debugging-correct-brightgreen)
 
-# 🤖 AI-Powered Scientific Text Summarization & Multimedia Processing Pipeline
+# 🤖 AI-Powered Multilingual Scientific Text & Audio Pipeline
 
-A comprehensive AI-driven system that integrates web scraping, natural language processing, and multimedia generation to summarize scientific articles and generate representative images. This pipeline automates data extraction from PubMed, processes text and audio inputs, and delivers outputs through a Telegram bot interface.
+A comprehensive AI-driven system that integrates web scraping, natural language processing, and multimedia processing to process scientific content in multiple languages. This end-to-end pipeline automates data extraction from PubMed, analyzes text and audio inputs, and delivers outputs as text or audio through a Telegram bot interface.
 
 ---
 
